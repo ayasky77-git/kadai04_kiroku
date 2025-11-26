@@ -9,7 +9,20 @@
 </head>
 <body>
     <header>
-        <img src="./images/menu.png" alt="menu">
+        <div popover="auto" id="menu_list"> 
+            <div class="midashi_menu">
+                <img src="./images/Vector.png" alt="tool">
+                <h3>せってい</h3>
+            </div>
+            <div class="midashi_menu">
+                <img src="./images/trash-2.png" alt="clear">
+                <h3>きろくを消す</h3>
+            </div>            
+        </div>
+
+        <input type="image" src="./images/menu.png" alt="menu" id="menu" popovertarget="menu_list" /> 
+        <input type="image" src="./images/x.png" alt="close" id="close" popovertarget="menu_list" />
+
     </header>
     <div class="main">
         <section>
@@ -24,7 +37,7 @@
                 <img src="./images/pen-tool.png" alt="theme">
                 <h3>テーマ</h3>
             </div>
-            <input type="text" id="theme" placeholder=" テーマを入力">
+            <input type="text" id="theme" placeholder="テーマを入力">
             <button id="theme_save">保存する</button>
         </section>
 
@@ -34,14 +47,37 @@
                 <h3>ラベルの追加（５つまで）</h3>
             </div>
             <div class="label_all">
-                tag表示
+                <div class="label">
+                    <p class="label_name">こうぎ</p>
+                    <p class="batu">×</p>
+                </div>
+
+                <div class="label">
+                    <p class="label_name">かだい</p>
+                    <p class="batu">×</p>
+                </div>
+
+                <div class="label">
+                    <p class="label_name">どうが</p>
+                    <p class="batu">×</p>
+                </div>
+
+                <div class="label">
+                    <p class="label_name">ちょうさ</p>
+                    <p class="batu">×</p>
+                </div>
+
+                <div class="label">
+                    <p class="label_name">じしゅれん</p>
+                    <p class="batu">×</p>
+                </div>
             </div>
-            <input type="text" id="label" placeholder=" ラベル名を入力">
+            <input type="text" id="label" placeholder="ラベル名を入力">
             <button id="label_add">追加する</button>
         </section>
 
     </div>
-    <footer>footer</footer>
+    <footer> © 2025 r7 Corporation All Rights Reserved.</footer>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     

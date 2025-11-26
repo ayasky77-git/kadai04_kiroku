@@ -1,3 +1,9 @@
+/* 全ての要素に対して、widthの中にpaddingとborderを含める */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* 全体背景カラー */
 html{
     background-color: #FBF9F1;
 }
@@ -6,7 +12,7 @@ body{
     width: 375px;
     height: 812px;
     margin: 0 auto;
-    background-color: #d6c064;
+    background-color: #FBF9F1;
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -15,7 +21,73 @@ body{
 header{
     height: 72px;
     margin-top: 44px;
+    padding: 10px;
     background-color: #CE5345;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+/* menuを広げるボタン */
+#menu:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+#close{
+    display: none;
+}
+
+#close:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+/* メニューリストの定義 */
+#menu_list{
+margin: 0;
+    position: fixed;
+    border: none;
+    /* ヘッダーのすぐ下に合わせる（ヘッダーの高さ72pxを基準） */
+    top: 116px; 
+    /* フッターの上で止める（フッターの高さ24px + マージン34px = 58px）*/
+    bottom: 58px; 
+    /* topとbottomの間を埋める */
+    height: auto; 
+    /* PC中央寄せのスマホ枠の右端に合わせる */
+    right: calc(50% - 187.5px);    
+    width: 250px;
+    /* レフトをリセット */
+    left: auto;
+    background-color: #FBF9F1;
+    z-index: 10000;
+    padding: 20px;
+    box-shadow: -2px 0 2px 0 rgba(0, 0, 0, 0.25);
+}   
+
+/* メニューリストが開いているとき、#menuボタンを非表示にする */
+#menu_list:popover-open ~ #menu {
+    display: none;
+}
+
+/* メニューリストが開いているとき、#closeボタンを表示する */
+#menu_list:popover-open ~ #close {
+    display: block;
+}
+
+.midashi,.midashi_menu{
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.midashi_menu{
+    margin: 12px 0px;
+}
+
+.midashi_menu:hover{
+    opacity: 0.5;
+    cursor: pointer;
 }
 
 .main{
@@ -23,13 +95,7 @@ header{
 }
 
 section{
-    margin: 12px 12px;
-}
-
-.midashi{
-    height: 48px;
-    display: flex;
-    align-items: center;
+    margin: 24px 12px;
 }
 
 #settei{
@@ -46,6 +112,8 @@ h3{
 #theme,#label{
     width: 100%;
     height: 48px;
+    padding: 10px;
+    margin: 6px 0px;
     border: 2px solid #A4A099;
     border-radius: 12px;
     font-size: 20px;
@@ -54,6 +122,7 @@ h3{
 button{
     width: 100%;
     height: 48px;
+    margin: 6px 0px;
     border: 2px solid #A4A099;
     border-radius: 12px;
     background-color: #74492B;
@@ -61,8 +130,44 @@ button{
     font-size: 20px;
 }
 
+.label{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: 36px;
+    padding: 0px 5px;
+    margin: 5px 20px 5px 0px;
+    font-size: 16px;
+    color: #FBF9F1;
+    background-color: #CE5345;
+    border-radius: 12px;
+
+}
+
+.label_name{
+    padding: 0px 5px;
+    margin: 0px;
+}
+
+.batu{
+    font-size: 26px;
+    padding: 0px 5px 5px 5px;
+    margin: 0px;
+}
+
+.label_all{
+    display: flex;
+    flex-wrap: wrap;
+}
+
 footer{
     height: 24px;
     margin-bottom: 34px;
     background-color: #CE5345; 
+    font-size: 14px;
+    color: #FBF9F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
