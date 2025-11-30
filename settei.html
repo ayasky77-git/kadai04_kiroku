@@ -20,6 +20,7 @@
         <input type="image" src="./images/x.png" alt="close" id="close" popovertarget="menu_list" />
 
     </header>
+
     <div class="main">
         <section>
             <div class="midashi" id="settei">
@@ -48,9 +49,9 @@
             <input type="text" id="label" placeholder="ラベル名を入力">
             <button id="label_add">追加する</button>
 
-            <div class="midashi_menu" id="next">
-                <img src="./images/next.png" alt="next">
-                <h3>きろく画面へ</h3>
+            <div class="midashi_menu" id="clear">
+                <img src="./images/trash-2.png" alt="clear">
+                <h3>きろくを消す</h3>
             </div>   
         </section>
 
@@ -59,7 +60,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
-    <script>
+    <script>        
         // 追加するラベルの上限数
         const label_max=5;
         // ラベルをカウントする変数
@@ -169,6 +170,27 @@
             localStorage.setItem('used_colors', JSON.stringify(used_colors));
         });
 
+                // Storegeを確認画面を出して、「すべて消すなら」すべて消す処理
+        $('#clear').on('click',function () {  
+            let checkSaveFlg = window.confirm('登録したテーマ、ラベル、きろく、すべてをリセットしますか？');
+            if(checkSaveFlg) {
+                alert("すべてリセットしました");
+                // Storegeリセット
+                localStorage.clear();
+                // 入力欄リセット
+                $('#theme').val('');
+                $('#label').val('');
+                // ラベルリセット
+                $('.label_all').html('');
+                // 各種値リセット
+                label_num=0;
+                label_name=[];
+                used_colors = [];
+                // ボタン非活性リセット
+                $('#label_add').prop('disabled',false);
+            } 
+        });
+
         // storegeからthemeを読み出す処理
         if(localStorage.getItem('theme')){
             const theme_save_data=localStorage.getItem('theme');
@@ -190,7 +212,7 @@
         if(localStorage.getItem('label_name')){
             label_name = JSON.parse(localStorage.getItem('label_name'));
             label_num = label_name.length; // 配列の長さからlabel_numを再設定
-
+            
             // 画面にラベル要素を再構築する
             for(let i = 0; i < label_name.length; i++){
                 $('.label_all').append('<div class="label" style="background-color: ' + label_name[i].color + ';">' + '<p class="label_name">' + label_name[i].name + '</p>' + '<p class="batu">×</p>' + '</div>');
@@ -202,16 +224,13 @@
             used_colors = JSON.parse(localStorage.getItem('used_colors'));
         }
 
+
         // menuの設定ボタンを押すと設定へとぶ
         // 時間があれば初期設定画面を作成する
         $('#menu_settei').on('click',function(){
             window.location.href = 'settei.html'; 
         });
         
-        // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
-        $('#next').on('click',function(){
-            window.location.href = 'main.html'; 
-        });
 
     </script>
     

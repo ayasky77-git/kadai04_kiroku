@@ -167,10 +167,9 @@ button{
     flex-wrap: wrap;
 }
 
-#clear{
+#next,#clear{
     margin-top: 60px;
-    text-align: center;
-    text-decoration: underline;
+    justify-content: center;
     cursor: pointer;
 }
 

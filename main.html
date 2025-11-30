@@ -22,6 +22,7 @@
     </header>
     <div class="main">
         <section>
+            メイン
             <div class="midashi" id="settei">
                 <img src="./images/Vector.png" alt="tool">
                 <h3>せってい</h3>
@@ -48,9 +49,9 @@
             <input type="text" id="label" placeholder="ラベル名を入力">
             <button id="label_add">追加する</button>
 
-            <div class="midashi_menu" id="next">
-                <img src="./images/next.png" alt="next">
-                <h3>きろく画面へ</h3>
+            <div class="midashi_menu" id="clear">
+                <img src="./images/trash-2.png" alt="clear">
+                <h3>きろくを消す</h3>
             </div>   
         </section>
 
@@ -62,21 +63,8 @@
     <script>
         // 追加するラベルの上限数
         const label_max=5;
-        // ラベルをカウントする変数
         let label_num=0;
-        // ラベル名を補完する配列
         let label_name=[];
-        // すでに使用中の色を管理するための配列
-        let used_colors = [];
-
-        // ラベル用の5つのカラーコードを定義
-        const label_colors = [
-        '#406199',
-        '#F2BF8C',
-        '#CE5345',
-        '#6AA94E',
-        '#74492B' 
-        ];
 
 
         // テーマを保存する処理
@@ -87,37 +75,13 @@
 
         // ラベルを追加する処理
         $('#label_add').on('click',function(){
-
-            // まだ使われていない色を探す
-            let selected_color = '';
-            for (let i = 0; i < label_colors.length; i++) {
-                if (!used_colors.includes(label_colors[i])) {
-                    selected_color = label_colors[i];
-                    break;
-                }
-            }
-
-            // 使用中リストとラベル情報に追加
-            used_colors.push(selected_color);
-
-            // ラベル情報をオブジェクトとして作成
-            let new_label = {
-                name: $('#label').val(),
-                color: selected_color
-            };
-
-            // label_name (オブジェクトの配列) に追加
-            label_name.push(new_label); 
-            label_num += 1; // ラベル数の更新
-
-            // ラベルの追加
-            $('.label_all').append('<div class="label" style="background-color: ' + new_label.color + ';">' + '<p class="label_name">' + new_label.name + '</p>' + '<p class="batu">×</p>' + '</div>');
+            $('.label_all').append('<div class="label"> <p class="label_name">'+$('#label').val()+'</p> <p class="batu">×</p> </div>');
+            label_name[label_num]=$('#label').val();
+            label_num+=1;
 
             // localStorgeを上書き
             localStorage.setItem('label_num',label_num);
             localStorage.setItem('label_name', JSON.stringify(label_name));  
-            localStorage.setItem('used_colors', JSON.stringify(used_colors));
-
             // 入力欄リセット
             $('#label').val('');
 
@@ -133,30 +97,15 @@
             let $label_to_remove = $(this).closest(".label");
             // 削除対象のlabel名を取得する
             let label_text_to_remove = $label_to_remove.find(".label_name").text();
-            // 削除対象のlabelのカラーを取得する
-            let color_to_release = $label_to_remove.css('background-color');
-            
-            // 削除対象のインデックスを label_name 配列（オブジェクトの配列）から探す
-            let index = label_name.findIndex(item => item.name === label_text_to_remove);
-
-            // used_colors から色を解放する
-            if (index > -1) {
-                // 解放する色を取得
-                let color_to_release = label_name[index].color;
-                
-                // label_name 配列からオブジェクトを削除
-                label_name.splice(index, 1);
-                
-                // used_colors から色を削除
-                let color_index = used_colors.indexOf(color_to_release);
-                if (color_index > -1) {
-                    used_colors.splice(color_index, 1);
-                }
-            }
-
             // その .label 要素をDOMから削除する
             $label_to_remove.remove();
-  
+            // そのlabel名が、配列のどこにあるかを探す
+            let index = label_name.indexOf(label_text_to_remove);
+            // indexが存在すればそのインデックスを削除
+            if (index >= 0) {
+                label_name.splice(index, 1);
+            }
+
             // 消したらラベルの数を減らして、規定より少ないならボタンを活性化する
             label_num-=1;
             if(label_num<label_max){
@@ -166,7 +115,26 @@
             // localStorgeを上書き
             localStorage.setItem('label_num',label_num);
             localStorage.setItem('label_name', JSON.stringify(label_name));        
-            localStorage.setItem('used_colors', JSON.stringify(used_colors));
+        });
+
+        // Storegeを確認画面を出して、「すべて消すなら」すべて消す処理
+        $('#clear').on('click',function () {  
+            let checkSaveFlg = window.confirm('登録したテーマ、ラベル、きろく、すべてをリセットしますか？');
+            if(checkSaveFlg) {
+                alert("すべてリセットしました");
+                // Storegeリセット
+                localStorage.clear();
+                // 入力欄リセット
+                $('#theme').val('');
+                $('#label').val('');
+                // ラベルリセット
+                $('.label_all').html('');
+                // 各種値リセット
+                label_num=0;
+                label_name=[];
+                // ボタン非活性リセット
+                $('#label_add').prop('disabled',false);
+            } 
         });
 
         // storegeからthemeを読み出す処理
@@ -188,18 +156,12 @@
 
         // ラベル配列（label_name）の読み出し
         if(localStorage.getItem('label_name')){
-            label_name = JSON.parse(localStorage.getItem('label_name'));
-            label_num = label_name.length; // 配列の長さからlabel_numを再設定
-
-            // 画面にラベル要素を再構築する
-            for(let i = 0; i < label_name.length; i++){
-                $('.label_all').append('<div class="label" style="background-color: ' + label_name[i].color + ';">' + '<p class="label_name">' + label_name[i].name + '</p>' + '<p class="batu">×</p>' + '</div>');
+            const stored_labels_json = localStorage.getItem('label_name');
+            // ★JSON.parse()で文字列を配列に戻す
+            label_name = JSON.parse(stored_labels_json);
+            for(let i=0;i<label_name.length;i++){
+                $('.label_all').append('<div class="label"> <p class="label_name">'+label_name[i]+'</p> <p class="batu">×</p> </div>');
             }
-        }
-        
-        // used_colors の読み出し
-        if(localStorage.getItem('used_colors')){
-            used_colors = JSON.parse(localStorage.getItem('used_colors'));
         }
 
         // menuの設定ボタンを押すと設定へとぶ
@@ -208,10 +170,6 @@
             window.location.href = 'settei.html'; 
         });
         
-        // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
-        $('#next').on('click',function(){
-            window.location.href = 'main.html'; 
-        });
 
     </script>
     
