@@ -28,6 +28,15 @@ header{
     justify-content: right;
 }
 
+#title{
+    /* 空きスペース分のばす */
+    flex-grow: 1;
+    color: #FBF9F1;
+    text-align: center;
+    font-size: 32px;
+
+}
+
 /* menuを広げるボタン */
 #menu:hover{
     opacity: 0.5;
@@ -95,6 +104,7 @@ margin: 0;
 }
 
 section{
+    width: 100%;
     margin: 24px 12px;
 }
 
@@ -109,7 +119,7 @@ h3{
     color: 201F1F;
 }
 
-#theme,#label{
+#theme,#label,#memo,#label_option{
     width: 100%;
     height: 48px;
     padding: 10px;
@@ -128,13 +138,14 @@ button{
     background-color: #74492B;
     color: #FBF9F1;
     font-size: 20px;
+    cursor: pointer;
 }
 
 #label_add:disabled {
-  background: #ccc;           /* グレーで無効感を出す */
-  color: #666;                /* 文字も薄く */
-  cursor: not-allowed;        /* 押せないマークに変更 */
-  box-shadow: none;
+    background: #ccc;           /* グレーで無効感を出す */
+    color: #666;                /* 文字も薄く */
+    cursor: not-allowed;        /* 押せないマークに変更 */
+    box-shadow: none;
 }
 
 .label{
@@ -181,4 +192,58 @@ footer{
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+
+/* mainのcss */
+.main{
+    /* display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; */
+}
+
+#tabs{
+    height: 100%;
+    background-color:#FBF9F1;
+}
+
+#kiroku{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#today{
+    color: #406199;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+
+#panel{
+    display: flex;
+    justify-content: center;
+}
+
+.panel_button{
+    margin: 0 36px;
+    cursor: pointer;
+}
+
+.panel_group{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+#reset{
+    margin: 0 auto;
+    display: inline-block;
+    border-bottom: 1px solid #406199;
+    font-size: 24px;
+    color: #406199;    
+    cursor: pointer;
 }

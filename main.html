@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kiroku</title>
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="./css/kiroku.css">
 </head>
 <body>
     <header>
+        <div id="title"></div>
         <div popover="auto" id="menu_list"> 
             <div class="midashi_menu" id="menu_settei">
                 <img src="./images/Vector.png" alt="tool">
@@ -21,137 +23,82 @@
 
     </header>
     <div class="main">
-        <section>
-            メイン
-            <div class="midashi" id="settei">
-                <img src="./images/Vector.png" alt="tool">
-                <h3>せってい</h3>
-            </div>
-        </section>
+        <div id="tabs">
+            <ul>
+                <li><a href="#kiroku">
+                    <div class="midashi" id="settei">
+                    <img src="./images/edit.png" alt="edit">
+                    <h3>きろく</h3>
+                    </div>
+                </a></li>
+                <li><a href="#graph">
+                    <div class="midashi" id="settei">
+                    <img src="./images/activity.png" alt="graph">
+                    <h3>グラフ</h3>
+                    </div>
+                </a></li>
+            </ul>
 
-        <section>
-            <div class="midashi">
-                <img src="./images/pen-tool.png" alt="theme">
-                <h3>テーマ</h3>
-            </div>
-            <input type="text" id="theme" placeholder="テーマを入力">
-            <button id="theme_save">保存する</button>
-        </section>
+            <div id="kiroku">
+                <section id="date">
+                </section>
+                <section>
+                    10:00:00
+                    <!-- 明日は時間から、menulistが崩れる権は別途調査 -->
+                </section>
+                <section class="panel_group">
+                    <div id="panel">
+                        <img src="./images/start.png" alt="start" class="panel_button">
+                        <img src="./images/stop.png" alt="stop" class="panel_button">
+                    </div>
+                    <p id="reset">リセット</p>
+                </section>
+                <section>
+                    <select name="label_option" id="label_option">
+                        <option value="" disabled selected>--選択してください--</option>
+                    </select>
 
-        <section>
-            <div class="midashi">
-                <img src="./images/tag.png" alt="label">
-                <h3>ラベルの追加（５つまで）</h3>
+                    <input type="text" id="memo" placeholder="メモを入力">
+                    <button id="memo_save">保存する</button>
+                </section>
             </div>
-            <div class="label_all">
-                <!-- ラベル名が追加されたら表示 -->
-            </div>
-            <input type="text" id="label" placeholder="ラベル名を入力">
-            <button id="label_add">追加する</button>
 
-            <div class="midashi_menu" id="clear">
-                <img src="./images/trash-2.png" alt="clear">
-                <h3>きろくを消す</h3>
-            </div>   
-        </section>
+            <div id="graph">
+                グラフタブ
+            </div>
+        </div>
 
     </div>
     <footer> © 2025 r7 Corporation All Rights Reserved.</footer>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <!-- タブ部分 -->
     <script>
-        // 追加するラベルの上限数
-        const label_max=5;
+        $(function() {
+        $("#tabs").tabs();
+        });
+    </script>
+    
+    <!--  Local Storageを読み込み  -->
+    <script>
+        // ラベルをカウントする変数
         let label_num=0;
+        // ラベル名を補完する配列
         let label_name=[];
-
-
-        // テーマを保存する処理
-        $('#theme_save').on('click',function(){
-            let theme = $('#theme').val();
-            localStorage.setItem('theme',theme);
-        });
-
-        // ラベルを追加する処理
-        $('#label_add').on('click',function(){
-            $('.label_all').append('<div class="label"> <p class="label_name">'+$('#label').val()+'</p> <p class="batu">×</p> </div>');
-            label_name[label_num]=$('#label').val();
-            label_num+=1;
-
-            // localStorgeを上書き
-            localStorage.setItem('label_num',label_num);
-            localStorage.setItem('label_name', JSON.stringify(label_name));  
-            // 入力欄リセット
-            $('#label').val('');
-
-            // ラベル数が規定を超えたら追加できなくする
-            if(label_num==label_max){
-                $('#label_add').prop('disabled',true);
-            }
-        });
-
-        // ×ボタンでラベルを消す処理
-        $('.label_all').on('click','.batu',function(){
-            // クリックされた .batu 要素から最も近い親要素 .label を見つける
-            let $label_to_remove = $(this).closest(".label");
-            // 削除対象のlabel名を取得する
-            let label_text_to_remove = $label_to_remove.find(".label_name").text();
-            // その .label 要素をDOMから削除する
-            $label_to_remove.remove();
-            // そのlabel名が、配列のどこにあるかを探す
-            let index = label_name.indexOf(label_text_to_remove);
-            // indexが存在すればそのインデックスを削除
-            if (index >= 0) {
-                label_name.splice(index, 1);
-            }
-
-            // 消したらラベルの数を減らして、規定より少ないならボタンを活性化する
-            label_num-=1;
-            if(label_num<label_max){
-            $('#label_add').prop('disabled',false);
-            }
-            
-            // localStorgeを上書き
-            localStorage.setItem('label_num',label_num);
-            localStorage.setItem('label_name', JSON.stringify(label_name));        
-        });
-
-        // Storegeを確認画面を出して、「すべて消すなら」すべて消す処理
-        $('#clear').on('click',function () {  
-            let checkSaveFlg = window.confirm('登録したテーマ、ラベル、きろく、すべてをリセットしますか？');
-            if(checkSaveFlg) {
-                alert("すべてリセットしました");
-                // Storegeリセット
-                localStorage.clear();
-                // 入力欄リセット
-                $('#theme').val('');
-                $('#label').val('');
-                // ラベルリセット
-                $('.label_all').html('');
-                // 各種値リセット
-                label_num=0;
-                label_name=[];
-                // ボタン非活性リセット
-                $('#label_add').prop('disabled',false);
-            } 
-        });
 
         // storegeからthemeを読み出す処理
         if(localStorage.getItem('theme')){
             const theme_save_data=localStorage.getItem('theme');
-            $('#theme').val(theme_save_data);
+            $('#title').append('<p>' + theme_save_data + 'きろく</p>');
+            console.log(theme_save_data);
         }
 
         // storegeからlabel_numを読み出す処理
         if(localStorage.getItem('label_num')){
             // 数値として呼び出すためintを使用
             label_num = parseInt(localStorage.getItem('label_num'));
-
-            // ラベル数が規定を超えたら追加できなくする
-            if(label_num==label_max){
-                $('#label_add').prop('disabled',true);
-            }
         }
 
         // ラベル配列（label_name）の読み出し
@@ -160,12 +107,24 @@
             // ★JSON.parse()で文字列を配列に戻す
             label_name = JSON.parse(stored_labels_json);
             for(let i=0;i<label_name.length;i++){
-                $('.label_all').append('<div class="label"> <p class="label_name">'+label_name[i]+'</p> <p class="batu">×</p> </div>');
+                $("#label_option").append('<option value='+label_name[i].name+'>'+label_name[i].name+'</option>');
             }
         }
+    </script>
+
+    <script>
+        // 日付を取得&表示
+        const days = ["日", "月", "火", "水", "木", "金", "土"];
+        let today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth()+ 1;
+        let date = today.getDate();
+        let dayOfWeek = today.getDay(); // 曜日
+        let date_time=(year + '年' + month + '月' + date + '日 (' + days[dayOfWeek] + ')');
+        $('#date').append('<h3 id=today>'+date_time+'</h3>');
+        
 
         // menuの設定ボタンを押すと設定へとぶ
-        // 時間があれば初期設定画面を作成する
         $('#menu_settei').on('click',function(){
             window.location.href = 'settei.html'; 
         });
