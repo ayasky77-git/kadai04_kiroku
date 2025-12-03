@@ -196,16 +196,60 @@ footer{
 
 
 /* mainのcss */
-.main{
-    /* display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; */
-}
-
 #tabs{
     height: 100%;
     background-color:#FBF9F1;
+}
+
+.ui-tabs .ui-tabs-nav {
+    margin: 0;
+    padding: 0;
+    list-style: none; /* リストの点（デフォルト）を非表示 */
+    /* Flexboxを適用し、横幅いっぱいに広げる ★ */
+    display: flex;
+    width: 100%; 
+    height: 50px;
+    border: none;
+    background-color: #FBF9F1;
+}
+
+/* 非アクティブなタブの親要素 (li) の設定 */
+.ui-tabs .ui-tabs-nav li {
+    /* これで横幅を均等に分割 */
+    flex-grow: 1; 
+    text-align: center; /* コンテンツ中央寄せ */
+    background-color: #E7E0D0; 
+    border: none;
+    margin-right: 0.1em; /* タブ間のわずかな境界 */
+}
+
+/* 非アクティブなタブの文字色 */
+.ui-tabs .ui-tabs-nav li a {
+    height: 100%;
+    width: 100%;
+    margin: 0px auto;
+    padding: 0;
+    color: #201F1F;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+}
+
+/* アクティブなタブ (きろく/グラフ) の親要素 (li.ui-tabs-active) の設定 */
+.ui-tabs .ui-tabs-nav .ui-tabs-active {
+    background-color: #FBF9F1 !important; 
+    /* アクティブなタブを前面に出すための設定 */
+    z-index: 2;
+}
+
+/* アクティブなタブの文字色 */
+.ui-tabs .ui-tabs-nav .ui-tabs-active a {
+    color: #201F1F; /* アクティブ時の文字色 */
+}
+
+/* タブ下の境界線（通常は灰色）を非表示にし、タブをコンテンツと一体化 */
+.ui-tabs .ui-tabs-panel {
+    border-top: none; 
 }
 
 #kiroku{
@@ -215,7 +259,7 @@ footer{
     align-items: center;
 }
 
-#today{
+#today,#average_time_display{
     color: #406199;
     font-size: 24px;
     font-weight: 900;
@@ -254,3 +298,15 @@ footer{
     font-size: 84px;
     color: #406199;    
 }
+
+/* グラフコンテナの設定 */
+#chart-container {
+    margin-top: 12px;
+    max-height: 300px;    
+    /* スクロールバーを表示 */
+    overflow-y: scroll; /* 縦方向のスクロールを有効にする */
+    overflow-x: hidden; /* 横方向のスクロールは無効にする (横棒グラフのため) */
+}
+
+
+/* cssの調整から */

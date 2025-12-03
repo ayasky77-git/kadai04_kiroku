@@ -65,8 +65,12 @@
             </div>
 
             <div id="graph">
-                <canvas id="myChart"></canvas>
-
+                <div id="average_time_display"></div>
+                <div id="graph-wrapper">
+                    <div id="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -90,6 +94,7 @@
         // タブ表示
         $(function() {
             $("#tabs").tabs();
+            displayOverallAverage(); // ★ ここで呼び出す
         });
 
         //Local Storageを読み込み
@@ -205,42 +210,154 @@
             $timertext.text('00:00:00'); // 表示をリセット
         });
 
-        // グラフ表示
-        // 明日はjson形式のところから
+        // label_name配列から、指定されたラベル名に対応する色を返す関数
+        function getLabelColor(name) {
+            // label_name配列を検索し、nameが一致するオブジェクトを見つける
+            const labelObject = label_name.find(item => item.name === name);
+            // オブジェクトが見つかったらその色を返し、見つからなかったらデフォルト値を返す
+            return labelObject ? labelObject.color : '#CCCCCC';
+        }
+        
+
+        // 保存処理
+        $('#memo_save').on('click',function(){
+            // 配列の定義、既存データの読み込み
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            
+            // ラベルを選択してない時はアラートを出す
+            const selectedLabel = $('#label_option').val();
+            if (!selectedLabel) {
+                alert('ラベルを選択してください。');
+                return;
+            }
+            
+            // レコードデータのオブジェクトの定義
+            const new_records ={
+                date:date_time,
+                labelName:$('#label_option').val(),
+                labelColor:getLabelColor($('#label_option').val()),
+                durationMs:elapsedTime,
+                memo:$('#memo').val(),
+            } 
+
+            // レコードデータの追加
+            records.push(new_records);
+
+            // JSONデータに変換
+            const json_records=JSON.stringify(records);
+
+            // localStorageに保存
+            localStorage.setItem('daily_records',json_records);
+
+            $('#reset').trigger('click');
+            $('#memo').val('');
+            alert('記録を保存しました！');
+
+            // 平均時間の再計算
+            displayOverallAverage();
+
+        });
+
+        // グラフ描画機能
         $(function() {
-			let ctx = $("#myChart");
-            let chartLabels = label_name.map(item => item.name);
-            console.log(label_name);
-			let myChart = new Chart(ctx, {
-				type: 'bar',
-				data: {
-					labels: chartLabels,
-					datasets: [{
-						label: 'Male',
-						data: [8, 5, 3],
-						backgroundColor: "rgba(65,105,225,0.4)"
-						}, {
-						label: 'Female',
-						data: [2, 10, 8],
-						backgroundColor: "rgba(255,105,180,0.4)"
-					}]
-				},
+            // Local Storageから全記録を読み込み
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            let labelsData = label_name; // label_name (色と名前の配列) を使用
+
+            if (records.length === 0) {
+                // 記録がない場合は処理を中断
+                console.log("記録データがありません。");
+            return; 
+            }
+
+            // グラフラベル（日付）の準備
+            const uniqueDates = Array.from(new Set(records.map(r => r.date))).sort();
+
+            // データセットの集計と整形
+            let chartDatasets = [];
+
+            labelsData.forEach(labelItem => {
+                let dataForLabel = [];
+        
+                uniqueDates.forEach(date => {
+                    const matchingRecords = records.filter(
+                        r => r.date === date && r.labelName === labelItem.name
+                    );
+
+                    // ミリ秒を分単位に合計してデータとして使用
+                    const totalMinutes = matchingRecords.reduce((sum, r) => sum + (r.durationMs / 60000), 0);
+            
+                    dataForLabel.push(totalMinutes.toFixed(2));
+                });
+
+                // データセットとして追加（各ラベルが積み上げ要素となる）
+                chartDatasets.push({
+                    label: labelItem.name,
+                    data: dataForLabel,
+                    backgroundColor: labelItem.color,
+                });
+            });
+
+            // グラフ描画
+            let ctx = $("#myChart");
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    // X軸ラベルとして日付を使用
+                    labels: uniqueDates, 
+                    // 集計したデータセットを使用
+                    datasets: chartDatasets, 
+                },
                 options: {
-                    // グラフを縦にする
-                    indexAxis: 'y',
+                    indexAxis: 'y', // 横棒グラフ（ラベルをY軸に表示）
+                    responsive: true,
                     scales: {
-                        x:{
-                            // X軸の棒を積み上げる
-                            stacked: true
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: '時間 (分)' // X軸の単位
+                            }
                         },
-                        y:{
-                            // Y軸の値を積み上げる
-                            stacked: true 
+                        y: {
+                            stacked: true
                         }
                     }
                 }
-			});
-		});
+            });
+        });
+        
+        // 平均時間を計算する関数
+        function calculateOverallAverageTime() {
+            const records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            if (records.length === 0) {
+                return 0;
+            }
+            const totalDurationMs = records.reduce((sum, record) => {
+                // time または durationMs のキー名に合わせて修正してください
+                return sum + (record.durationMs || record.time || 0); 
+            }, 0);
+            
+            const totalMinutes = totalDurationMs / 60000;
+            return totalMinutes / records.length;
+        }
+
+        // 全体の平均時間を計算し、整形して表示する関数
+        function displayOverallAverage() {
+            // calculateOverallAverageTime がここでアクセス可能になる
+            const averageMinutes = calculateOverallAverageTime(); 
+            
+            if (averageMinutes === 0) {
+                $('#average_time_display').text('記録がありません');
+                return;
+            }
+
+            const averageMs = averageMinutes * 60000;
+            const formattedTime = msecToSecString(averageMs); // 既存関数を使用
+
+            $('#average_time_display').html('<h3>全体の平均時間: ' + formattedTime + '</h3>');
+        }
+
 
     </script>
 
