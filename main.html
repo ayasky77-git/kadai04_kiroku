@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kiroku</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="./css/kiroku.css">
+</head>
+<body>
+    <header>
+        <div id="title"></div>
+        <div popover="auto" id="menu_list"> 
+            <div class="midashi_menu" id="menu_settei">
+                <img src="./images/Vector.png" alt="tool">
+                <h3>せってい</h3>
+            </div>         
+        </div>
+
+        <input type="image" src="./images/menu.png" alt="menu" id="menu" popovertarget="menu_list" /> 
+        <input type="image" src="./images/x.png" alt="close" id="close" popovertarget="menu_list" />
+
+    </header>
+    <div class="main">
+        <div id="tabs">
+            <ul>
+                <li><a href="#kiroku">
+                    <div class="midashi" id="settei">
+                    <img src="./images/edit.png" alt="edit">
+                    <h3>きろく</h3>
+                    </div>
+                </a></li>
+                <li><a href="#graph">
+                    <div class="midashi" id="settei">
+                    <img src="./images/activity.png" alt="graph">
+                    <h3>グラフ</h3>
+                    </div>
+                </a></li>
+            </ul>
+
+            <div id="kiroku">
+                <section>
+                    <div id="date">
+                    </div>
+                    <div id="timer">
+                        <p id="timertext"></p>
+                    </div>                    
+                    <div class="panel_group">
+                        <div id="panel">
+                            <img src="./images/start.png" alt="start" class="panel_button" id="start">
+                            <img src="./images/stop.png" alt="stop" class="panel_button" id="stop">
+                        </div>
+                        <p id="reset">リセット</p>
+                    </div>
+                </section>
+                <section>
+                    <select name="label_option" id="label_option">
+                        <option value="" disabled selected>--選択してください--</option>
+                    </select>
+
+                    <input type="text" id="memo" placeholder="メモを入力">
+                    <button id="memo_save">保存する</button>
+                </section>
+            </div>
+
+            <div id="graph">
+                <div id="average_time_display"></div>
+                <div id="graph-wrapper">
+                    <div id="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <footer> © 2025 r7 Corporation All Rights Reserved.</footer>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Local Storage関連
+        let label_num = 0;
+        let label_name = [];
+
+        // タイマー関連
+        let startTime = 0;      // 直前の計測セグメントの開始時刻 (timestamp)
+        let elapsedTime = 0;    // 停止までに蓄積された合計経過時間 (ms)
+        let timerID = null;     // タイマーIDを保持
+        let $timertext;         // jQueryオブジェクトを保持
+
+        // タブ表示
+        $(function() {
+            $("#tabs").tabs();
+            displayOverallAverage(); // ★ ここで呼び出す
+        });
+
+        //Local Storageを読み込み
+        // storegeからthemeを読み出す処理
+        if(localStorage.getItem('theme')){
+            const theme_save_data=localStorage.getItem('theme');
+            $('#title').append('<p>' + theme_save_data + 'きろく</p>');
+            console.log(theme_save_data);
+        }
+
+        // storegeからlabel_numを読み出す処理
+        if(localStorage.getItem('label_num')){
+            // 数値として呼び出すためintを使用
+            label_num = parseInt(localStorage.getItem('label_num'));
+        }
+
+        // ラベル配列（label_name）の読み出し
+        if(localStorage.getItem('label_name')){
+            const stored_labels_json = localStorage.getItem('label_name');
+            // ★JSON.parse()で文字列を配列に戻す
+            label_name = JSON.parse(stored_labels_json);
+            for(let i=0;i<label_name.length;i++){
+                $("#label_option").append('<option value='+label_name[i].name+'>'+label_name[i].name+'</option>');
+            }
+        }
+
+        // 日付を取得&表示
+        const days = ["日", "月", "火", "水", "木", "金", "土"];
+        let today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth()+ 1;
+        let date = today.getDate();
+        let dayOfWeek = today.getDay(); // 曜日
+        let date_time=(year + '年' + month + '月' + date + '日 (' + days[dayOfWeek] + ')');
+        $('#date').append('<h3 id=today>'+date_time+'</h3>');
+        
+        // menuの設定ボタンを押すと設定へとぶ
+        $('#menu_settei').on('click',function(){
+            window.location.href = 'settei.html'; 
+        });
+
+        // タイマー機能
+        // ミリ秒を経過時間の文字列に直す関数
+        function msecToSecString(time) {
+            
+            // 単位をミリ秒から秒へ変換
+            let totalSeconds = Math.floor(time / 1000);
+            // 秒数
+            const seconds = totalSeconds % 60;            
+            // 分数
+            let totalMinutes = Math.floor(totalSeconds / 60);
+            const minutes = totalMinutes % 60;
+
+            // 時間
+            const hours = Math.floor(totalMinutes / 60);
+
+            // 取得した数値をも2桁の文字列になるように、必要に応じて0を補う
+            const secondStr = (seconds < 10 ? '0' : '') + String(seconds);
+            const minutesStr = (minutes < 10 ? '0' : '') + String(minutes);
+            const hoursStr = (hours < 10 ? '0' : '') + String(hours);
+
+            return hoursStr + ":" + minutesStr + ":" + secondStr;
+        }
+
+        // タイマーの時刻を更新する処理
+        function UpdateTimer() {
+            const nowTime = new Date().getTime();
+            // 合計時間 = 蓄積されていた時間 + 直前のスタート時からの経過時間
+            const totalTime = elapsedTime + (nowTime - startTime);
+            // jQueryオブジェクトの.text()メソッドを使って更新
+            $timertext.text(msecToSecString(totalTime));
+        }
+
+        $(function() {
+            $timertext = $("#timertext");
+            // タイマーの初期表示
+            $timertext.text('00:00:00');
+        });
+
+        // スタートボタン処理
+        $('#start').on('click',function(){
+            // タイマーが動いていたら何もしない
+            if (timerID !== null) return; 
+
+            // 現在の時刻を、今回の計測セグメントのスタート時刻として記録
+            startTime = new Date().getTime();
+        
+            // タイマーを開始し、IDを保存
+            timerID = setInterval(UpdateTimer, 1000);
+        });
+        
+        // 停止処理
+        $('#stop').on('click', function(){
+            // タイマーが停止していたら何もしない
+            if (timerID === null) return;
+
+            clearInterval(timerID); // タイマーを停止
+            timerID = null;         // IDをクリア
+
+            // 直前のセグメントでの経過時間を計算し、合計経過時間(elapsedTime)に加算して保存
+            elapsedTime += new Date().getTime() - startTime; 
+        
+            // 停止した時点での正確な時間を表示に反映（UpdateTimerが最後に実行された結果を確定）
+            $timertext.text(msecToSecString(elapsedTime));
+        });
+
+        // リセット処理
+        $('#reset').on('click', function(){
+            clearInterval(timerID); // 動作中なら停止
+            timerID = null;
+            elapsedTime = 0;        // 蓄積時間をリセット
+            startTime = 0;          // 開始時間をリセット
+            $timertext.text('00:00:00'); // 表示をリセット
+        });
+
+        // label_name配列から、指定されたラベル名に対応する色を返す関数
+        function getLabelColor(name) {
+            // label_name配列を検索し、nameが一致するオブジェクトを見つける
+            const labelObject = label_name.find(item => item.name === name);
+            // オブジェクトが見つかったらその色を返し、見つからなかったらデフォルト値を返す
+            return labelObject ? labelObject.color : '#CCCCCC';
+        }
+        
+
+        // 保存処理
+        $('#memo_save').on('click',function(){
+            // 配列の定義、既存データの読み込み
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            
+            // ラベルを選択してない時はアラートを出す
+            const selectedLabel = $('#label_option').val();
+            if (!selectedLabel) {
+                alert('ラベルを選択してください。');
+                return;
+            }
+            
+            // レコードデータのオブジェクトの定義
+            const new_records ={
+                date:date_time,
+                labelName:$('#label_option').val(),
+                labelColor:getLabelColor($('#label_option').val()),
+                durationMs:elapsedTime,
+                memo:$('#memo').val(),
+            } 
+
+            // レコードデータの追加
+            records.push(new_records);
+
+            // JSONデータに変換
+            const json_records=JSON.stringify(records);
+
+            // localStorageに保存
+            localStorage.setItem('daily_records',json_records);
+
+            $('#reset').trigger('click');
+            $('#memo').val('');
+            alert('記録を保存しました！');
+
+            // 平均時間の再計算
+            displayOverallAverage();
+
+        });
+
+        // グラフ描画機能
+        $(function() {
+            // Local Storageから全記録を読み込み
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            let labelsData = label_name; // label_name (色と名前の配列) を使用
+
+            if (records.length === 0) {
+                // 記録がない場合は処理を中断
+                console.log("記録データがありません。");
+            return; 
+            }
+
+            // グラフラベル（日付）の準備
+            const uniqueDates = Array.from(new Set(records.map(r => r.date))).sort();
+
+            // データセットの集計と整形
+            let chartDatasets = [];
+
+            labelsData.forEach(labelItem => {
+                let dataForLabel = [];
+        
+                uniqueDates.forEach(date => {
+                    const matchingRecords = records.filter(
+                        r => r.date === date && r.labelName === labelItem.name
+                    );
+
+                    // ミリ秒を分単位に合計してデータとして使用
+                    const totalMinutes = matchingRecords.reduce((sum, r) => sum + (r.durationMs / 60000), 0);
+            
+                    dataForLabel.push(totalMinutes.toFixed(2));
+                });
+
+                // データセットとして追加（各ラベルが積み上げ要素となる）
+                chartDatasets.push({
+                    label: labelItem.name,
+                    data: dataForLabel,
+                    backgroundColor: labelItem.color,
+                });
+            });
+
+            // グラフ描画
+            let ctx = $("#myChart");
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    // X軸ラベルとして日付を使用
+                    labels: uniqueDates, 
+                    // 集計したデータセットを使用
+                    datasets: chartDatasets, 
+                },
+                options: {
+                    indexAxis: 'y', // 横棒グラフ（ラベルをY軸に表示）
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: '時間 (分)' // X軸の単位
+                            }
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        });
+        
+        // 平均時間を計算する関数
+        function calculateOverallAverageTime() {
+            const records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            if (records.length === 0) {
+                return 0;
+            }
+            const totalDurationMs = records.reduce((sum, record) => {
+                // time または durationMs のキー名に合わせて修正してください
+                return sum + (record.durationMs || record.time || 0); 
+            }, 0);
+            
+            const totalMinutes = totalDurationMs / 60000;
+            return totalMinutes / records.length;
+        }
+
+        // 全体の平均時間を計算し、整形して表示する関数
+        function displayOverallAverage() {
+            // calculateOverallAverageTime がここでアクセス可能になる
+            const averageMinutes = calculateOverallAverageTime(); 
+            
+            if (averageMinutes === 0) {
+                $('#average_time_display').text('記録がありません');
+                return;
+            }
+
+            const averageMs = averageMinutes * 60000;
+            const formattedTime = msecToSecString(averageMs); // 既存関数を使用
+
+            $('#average_time_display').html('<h3>全体の平均時間: ' + formattedTime + '</h3>');
+        }
+
+
+    </script>
+
+</body>
+</html>

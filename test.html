@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+</head>
+<body>
+
+<div id="tabs">
+  <ul>
+    <li><a href="#tab1">タブ1</a></li>
+    <li><a href="#tab2">タブ2</a></li>
+    <li><a href="#tab3">タブ3</a></li>
+  </ul>
+  <div id="tab1">
+    <h3>タブ1の内容</h3>
+    <p>タブ1に表示される内容です。</p>
+  </div>
+  <div id="tab2">
+    <h3>タブ2の内容</h3>
+    <p>タブ2に表示される内容です。</p>
+  </div>
+  <div id="tab3">
+    <h3>タブ3の内容</h3>
+    <p>タブ3に表示される内容です。</p>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+$(function() {
+  $("#tabs").tabs();
+});
+</script>
+
+</body>
+</html>

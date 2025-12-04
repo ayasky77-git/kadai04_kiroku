@@ -1,0 +1,312 @@
+/* 全ての要素に対して、widthの中にpaddingとborderを含める */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* 全体背景カラー */
+html{
+    background-color: #FBF9F1;
+}
+
+body{
+    width: 375px;
+    height: 812px;
+    margin: 0 auto;
+    background-color: #FBF9F1;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+header{
+    height: 72px;
+    margin-top: 44px;
+    padding: 10px;
+    background-color: #CE5345;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+#title{
+    /* 空きスペース分のばす */
+    flex-grow: 1;
+    color: #FBF9F1;
+    text-align: center;
+    font-size: 32px;
+
+}
+
+/* menuを広げるボタン */
+#menu:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+#close{
+    display: none;
+}
+
+#close:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+/* メニューリストの定義 */
+#menu_list{
+margin: 0;
+    position: fixed;
+    border: none;
+    /* ヘッダーのすぐ下に合わせる（ヘッダーの高さ72pxを基準） */
+    top: 116px; 
+    /* フッターの上で止める（フッターの高さ24px + マージン34px = 58px）*/
+    bottom: 58px; 
+    /* topとbottomの間を埋める */
+    height: auto; 
+    /* PC中央寄せのスマホ枠の右端に合わせる */
+    right: calc(50% - 187.5px);    
+    width: 250px;
+    /* レフトをリセット */
+    left: auto;
+    background-color: #FBF9F1;
+    z-index: 10000;
+    padding: 20px;
+    box-shadow: -2px 0 2px 0 rgba(0, 0, 0, 0.25);
+}   
+
+/* メニューリストが開いているとき、#menuボタンを非表示にする */
+#menu_list:popover-open ~ #menu {
+    display: none;
+}
+
+/* メニューリストが開いているとき、#closeボタンを表示する */
+#menu_list:popover-open ~ #close {
+    display: block;
+}
+
+.midashi,.midashi_menu{
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.midashi_menu{
+    margin: 12px 0px;
+}
+
+.midashi_menu:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.main{
+    flex: 1; /* 余った高さを全部使う */
+}
+
+section{
+    width: 100%;
+    margin: 24px 12px;
+}
+
+#settei{
+    justify-content: center;
+}
+
+h3{
+    margin: 0 8px;
+    font-size: 24px;
+    font-weight: lighter;
+    color: 201F1F;
+}
+
+#theme,#label,#memo,#label_option{
+    width: 100%;
+    height: 48px;
+    padding: 10px;
+    margin: 6px 0px;
+    border: 2px solid #A4A099;
+    border-radius: 12px;
+    font-size: 20px;
+}
+
+button{
+    width: 100%;
+    height: 48px;
+    margin: 6px 0px;
+    border: 2px solid #A4A099;
+    border-radius: 12px;
+    background-color: #74492B;
+    color: #FBF9F1;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#label_add:disabled {
+    background: #ccc;           /* グレーで無効感を出す */
+    color: #666;                /* 文字も薄く */
+    cursor: not-allowed;        /* 押せないマークに変更 */
+    box-shadow: none;
+}
+
+.label{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: 36px;
+    padding: 0px 5px;
+    margin: 5px 20px 5px 0px;
+    font-size: 16px;
+    color: #FBF9F1;
+    border-radius: 12px;
+}
+
+.label_name{
+    padding: 0px 5px;
+    margin: 0px;
+}
+
+.batu{
+    font-size: 26px;
+    padding: 0px 5px 5px 5px;
+    margin: 0px;
+}
+
+.label_all{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#next,#clear{
+    margin-top: 60px;
+    justify-content: center;
+    cursor: pointer;
+}
+
+footer{
+    height: 24px;
+    margin-bottom: 34px;
+    background-color: #CE5345; 
+    font-size: 14px;
+    color: #FBF9F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* mainのcss */
+#tabs{
+    height: 100%;
+    background-color:#FBF9F1;
+}
+
+.ui-tabs .ui-tabs-nav {
+    margin: 0;
+    padding: 0;
+    list-style: none; /* リストの点（デフォルト）を非表示 */
+    /* Flexboxを適用し、横幅いっぱいに広げる ★ */
+    display: flex;
+    width: 100%; 
+    height: 50px;
+    border: none;
+    background-color: #FBF9F1;
+}
+
+/* 非アクティブなタブの親要素 (li) の設定 */
+.ui-tabs .ui-tabs-nav li {
+    /* これで横幅を均等に分割 */
+    flex-grow: 1; 
+    text-align: center; /* コンテンツ中央寄せ */
+    background-color: #E7E0D0; 
+    border: none;
+    margin-right: 0.1em; /* タブ間のわずかな境界 */
+}
+
+/* 非アクティブなタブの文字色 */
+.ui-tabs .ui-tabs-nav li a {
+    height: 100%;
+    width: 100%;
+    margin: 0px auto;
+    padding: 0;
+    color: #201F1F;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+}
+
+/* アクティブなタブ (きろく/グラフ) の親要素 (li.ui-tabs-active) の設定 */
+.ui-tabs .ui-tabs-nav .ui-tabs-active {
+    background-color: #FBF9F1 !important; 
+    /* アクティブなタブを前面に出すための設定 */
+    z-index: 2;
+}
+
+/* アクティブなタブの文字色 */
+.ui-tabs .ui-tabs-nav .ui-tabs-active a {
+    color: #201F1F; /* アクティブ時の文字色 */
+}
+
+/* タブ下の境界線（通常は灰色）を非表示にし、タブをコンテンツと一体化 */
+.ui-tabs .ui-tabs-panel {
+    border-top: none; 
+}
+
+#kiroku{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#today,#average_time_display{
+    color: #406199;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+
+#panel{
+    display: flex;
+    justify-content: center;
+}
+
+.panel_button{
+    margin: 0 36px;
+    cursor: pointer;
+}
+
+.panel_group{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+#reset{
+    margin: 10px auto;
+    display: inline-block;
+    border-bottom: 1px solid #406199;
+    font-size: 24px;
+    color: #406199;    
+    cursor: pointer;
+}
+
+#timertext{
+    margin: 10px auto;
+    text-align: center;
+    font-size: 84px;
+    color: #406199;    
+}
+
+/* グラフコンテナの設定 */
+#chart-container {
+    margin-top: 12px;
+    max-height: 300px;    
+    /* スクロールバーを表示 */
+    overflow-y: scroll; /* 縦方向のスクロールを有効にする */
+    overflow-x: hidden; /* 横方向のスクロールは無効にする (横棒グラフのため) */
+}
+
+
+/* cssの調整から */
