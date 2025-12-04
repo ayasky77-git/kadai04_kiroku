@@ -10,6 +10,11 @@
 <body>
     <header>
         <div popover="auto" id="menu_list"> 
+            <div class="midashi_menu" id="next1">
+                <img src="./images/next.png" alt="next">
+                <h3>きろく画面へ</h3>
+            </div> 
+
             <div class="midashi_menu" id="menu_settei">
                 <img src="./images/Vector.png" alt="tool">
                 <h3>せってい</h3>
@@ -225,6 +230,11 @@
         }
 
 
+        // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
+        $('#next1').on('click',function(){
+            window.location.href = 'main.html'; 
+        });
+        
         // menuの設定ボタンを押すと設定へとぶ
         $('#menu_settei').on('click',function(){
             window.location.href = 'settei.html'; 
