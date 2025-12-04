@@ -10,6 +10,11 @@
 <body>
     <header>
         <div popover="auto" id="menu_list"> 
+            <div class="midashi_menu" id="next1">
+                <img src="./images/next.png" alt="next">
+                <h3>きろく画面へ</h3>
+            </div>   
+
             <div class="midashi_menu" id="menu_settei">
                 <img src="./images/Vector.png" alt="tool">
                 <h3>せってい</h3>
@@ -26,6 +31,10 @@
                 <img src="./images/Vector.png" alt="tool">
                 <h3>しょきせってい</h3>
             </div>
+        </section>
+
+        <section id="introduction">
+            <p>このアプリは使った時間を記録するアプリです。<br>記録したい時間のテーマ、ラベルを設定してください。次のページで時間を計測し、グラフ化できます。</p>
         </section>
 
         <section>
@@ -48,7 +57,7 @@
             <input type="text" id="label" placeholder="ラベル名を入力">
             <button id="label_add">追加する</button>
 
-            <div class="midashi_menu" id="next">
+            <div class="midashi_menu" id="next2">
                 <img src="./images/next.png" alt="next">
                 <h3>きろく画面へ</h3>
             </div>   
@@ -208,7 +217,13 @@
         });
         
         // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
-        $('#next').on('click',function(){
+        $('#next1').on('click',function(){
+            window.location.href = 'main.html'; 
+        });
+
+
+        // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
+        $('#next2').on('click',function(){
             window.location.href = 'main.html'; 
         });
 

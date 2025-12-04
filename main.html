@@ -12,6 +12,11 @@
     <header>
         <div id="title"></div>
         <div popover="auto" id="menu_list"> 
+            <div class="midashi_menu" id="next1">
+                <img src="./images/next.png" alt="next">
+                <h3>きろく画面へ</h3>
+            </div> 
+
             <div class="midashi_menu" id="menu_settei">
                 <img src="./images/Vector.png" alt="tool">
                 <h3>せってい</h3>
@@ -91,12 +96,6 @@
         let timerID = null;     // タイマーIDを保持
         let $timertext;         // jQueryオブジェクトを保持
 
-        // タブ表示
-        $(function() {
-            $("#tabs").tabs();
-            displayOverallAverage(); // ★ ここで呼び出す
-        });
-
         //Local Storageを読み込み
         // storegeからthemeを読み出す処理
         if(localStorage.getItem('theme')){
@@ -131,6 +130,11 @@
         let date_time=(year + '年' + month + '月' + date + '日 (' + days[dayOfWeek] + ')');
         $('#date').append('<h3 id=today>'+date_time+'</h3>');
         
+        // 「きろく画面へ」ボタンを押す「きろく画面」へとぶ
+        $('#next1').on('click',function(){
+            window.location.href = 'main.html'; 
+        });
+
         // menuの設定ボタンを押すと設定へとぶ
         $('#menu_settei').on('click',function(){
             window.location.href = 'settei.html'; 
@@ -259,35 +263,74 @@
         });
 
         // グラフ描画機能
-        $(function() {
+        function drawChart() {
+            // 既存のグラフインスタンスがあれば破棄（再描画のため）
+            if (window.myChartInstance) {
+                window.myChartInstance.destroy();
+            }
+            
             // Local Storageから全記録を読み込み
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
-            let labelsData = label_name; // label_name (色と名前の配列) を使用
+            let labelsData = label_name; 
 
             if (records.length === 0) {
-                // 記録がない場合は処理を中断
                 console.log("記録データがありません。");
-            return; 
+                return; 
             }
 
-            // グラフラベル（日付）の準備
-            const uniqueDates = Array.from(new Set(records.map(r => r.date))).sort();
+            // グラフラベル（日付）の準備とソート
+            // ユニークな日付を取得
+            const uniqueDateStrings = Array.from(new Set(records.map(r => r.date)));
+            
+            // 日付文字列を Date オブジェクトに変換し、ソート可能な形式にする
+            const sortedDates = uniqueDateStrings
+                .map(dateStr => {
+                    // "YYYY年MM月DD日 (曜日)" の形式から、日付情報のみを抽出
+                    const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+                    
+                    if (match && match.length === 4) {
+                        // match[1]:年, match[2]:月, match[3]:日
+                        // 月は0から始まるため match[2] - 1 が必要
+                        const date = new Date(match[1], match[2] - 1, match[3]);
+                        
+                        // Dateオブジェクトが有効かチェック
+                        if (isNaN(date.getTime())) {
+                            console.error('無効な日付を検出 (パース失敗):', dateStr);
+                            return null;
+                        }
+                        // Dateオブジェクトと元の文字列をペアで返す
+                        return { originalStr: dateStr, dateObj: date };
+                    }
+                    console.error('日付フォーマットが一致しません:', dateStr);
+                    return null;
+                })
+                .filter(item => item !== null) // 無効な日付をフィルタリング
+                .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime()) // Dateオブジェクトでソート
+                
+                // 3. 元の表示形式 ("YYYY年MM月DD日 (曜日)") に戻す
+                .map(item => item.originalStr); // ソートされた元の文字列の配列に戻す
+
+            console.log('Sorted Dates (for Chart Labels):', sortedDates);
+
 
             // データセットの集計と整形
             let chartDatasets = [];
-
+            
+            // データをラベルごとに集計
             labelsData.forEach(labelItem => {
                 let dataForLabel = [];
-        
-                uniqueDates.forEach(date => {
+
+                // ソートされた日付を基準にデータを集計する
+                sortedDates.forEach(date => {
                     const matchingRecords = records.filter(
+                        // 記録の日付と集計対象の日付が一致し、かつラベル名が一致するものをフィルタ
                         r => r.date === date && r.labelName === labelItem.name
                     );
 
-                    // ミリ秒を分単位に合計してデータとして使用
-                    const totalMinutes = matchingRecords.reduce((sum, r) => sum + (r.durationMs / 60000), 0);
+                    // ミリ秒を時間単位に合計 (3600000ms = 1h)
+                    const totalHours = matchingRecords.reduce((sum, r) => sum + (r.durationMs / 3600000), 0);
             
-                    dataForLabel.push(totalMinutes.toFixed(2));
+                    dataForLabel.push(totalHours); 
                 });
 
                 // データセットとして追加（各ラベルが積み上げ要素となる）
@@ -300,66 +343,120 @@
 
             // グラフ描画
             let ctx = $("#myChart");
-            new Chart(ctx, {
+            
+            // 棒グラフの高さの計算と適用
+            const barHeight = 40; 
+            // データポイント数に基づいて高さを動的に計算
+            const requiredHeight = sortedDates.length * barHeight + 100; 
+            ctx.css('height', `${requiredHeight}px`); 
+            
+            // Chart.js インスタンスをグローバル変数に保存
+            window.myChartInstance = new Chart(ctx, { 
                 type: 'bar',
                 data: {
-                    // X軸ラベルとして日付を使用
-                    labels: uniqueDates, 
-                    // 集計したデータセットを使用
+                    labels: sortedDates, 
                     datasets: chartDatasets, 
                 },
                 options: {
                     indexAxis: 'y', // 横棒グラフ（ラベルをY軸に表示）
                     responsive: true,
+                    maintainAspectRatio: false, // 高さをCSSで制御できるようにする
                     scales: {
                         x: {
                             stacked: true,
                             title: {
                                 display: true,
-                                text: '時間 (分)' // X軸の単位
-                            }
+                                text: '時間 (時間)' 
+                            },
+                            // X軸の目盛りの表示を小数点第2位までに制限する
+                            ticks: { 
+                                callback: function(value, index, ticks) {
+                                    if (value <= 0) return null; 
+                                    return value.toFixed(2) + 'H';
+                                }
+                            },
+                            min: 0, // 負の値を非表示にする
                         },
                         y: {
-                            stacked: true
+                            stacked: true,
+                            // 棒の間隔を調整
+                            barPercentage: 1.0, 
+                            categoryPercentage: 0.9, 
                         }
                     }
                 }
             });
+        }
+
+
+        // タブ表示と、グラフ描画関数の呼び出しの修正
+        $(function() {
+            $("#tabs").tabs({
+                // タブがアクティブになったときに実行
+                activate: function(event, ui) {
+                    // 新しいタブが #graph であることを確認
+                    if (ui.newTab.find('a').attr('href') === '#graph') {
+                        drawChart(); 
+                    }
+                }
+            });
+            displayOverallAverage();
+
+            // 初回ロード時、「グラフ」タブがアクティブな場合（画像の状態）は、明示的に描画関数を呼び出す
+            if ($("#tabs").tabs("option", "active") === 1) { 
+                drawChart();
+            }
         });
         
-        // 平均時間を計算する関数
+        // 平均時間と合計時間を計算する関数
         function calculateOverallAverageTime() {
             const records = JSON.parse(localStorage.getItem('daily_records') || '[]');
             if (records.length === 0) {
-                return 0;
+                // 記録がない場合は、平均0と合計0をオブジェクトで返す
+                return { averageMinutes: 0, totalDurationMs: 0 };
             }
+            
             const totalDurationMs = records.reduce((sum, record) => {
-                // time または durationMs のキー名に合わせて修正してください
-                return sum + (record.durationMs || record.time || 0); 
+                // durationMs が存在しない場合を考慮して、0をデフォルトにする
+                return sum + (record.durationMs || 0); 
             }, 0);
             
             const totalMinutes = totalDurationMs / 60000;
-            return totalMinutes / records.length;
+            const averageMinutes = totalMinutes / records.length;
+            
+            // 平均と合計のミリ秒をオブジェクトとして返す
+            return { 
+                averageMinutes: averageMinutes, 
+                totalDurationMs: totalDurationMs 
+            };
         }
 
-        // 全体の平均時間を計算し、整形して表示する関数
+        // 全体の平均時間、合計時間を計算し、整形して表示する関数
         function displayOverallAverage() {
-            // calculateOverallAverageTime がここでアクセス可能になる
-            const averageMinutes = calculateOverallAverageTime(); 
+            // calculateOverallAverageTime がオブジェクトを返すように修正された
+            const result = calculateOverallAverageTime(); 
             
-            if (averageMinutes === 0) {
+            if (result.averageMinutes === 0) {
                 $('#average_time_display').text('記録がありません');
                 return;
             }
 
-            const averageMs = averageMinutes * 60000;
-            const formattedTime = msecToSecString(averageMs); // 既存関数を使用
+            // 平均時間 (分) からミリ秒と整形済み文字列を計算
+            const averageMs = result.averageMinutes * 60000;
+            const formattedAverageTime = msecToSecString(averageMs); 
 
-            $('#average_time_display').html('<h3>全体の平均時間: ' + formattedTime + '</h3>');
+            // 合計時間 (ミリ秒) を整形
+            const totalMs = result.totalDurationMs;
+            const formattedTotalTime = msecToSecString(totalMs); // 既存関数を使用
+
+            $('#average_time_display').html(
+                '<h3>平均: ' + formattedAverageTime + '</h3>' +
+                '<h3>合計: ' + formattedTotalTime + '</h3>'
+            );
         }
-
-
     </script>
+
+    
 
 </body>
 </html>

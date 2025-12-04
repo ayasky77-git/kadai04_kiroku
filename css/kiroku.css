@@ -12,28 +12,37 @@ body{
     width: 100%; 
     /* PC表示時の最大の幅を設定 */
     max-width: 450px; 
-    /* 左右のマージンをautoにすることで、max-widthを超えた場合にコンテンツを中央寄せする */
     margin: 0 auto; 
     min-height: 100vh;
     background-color: #FBF9F1;
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
+    /* デバイスのデフォルト明朝体を消す処理 */
     font-family: 'Noto Sans JP', 
-                 'Hiragino Sans',      /* Mac/iOSのゴシック体 */
-                 'Hiragino Kaku Gothic ProN', /* Mac/iOSのゴシック体 (古い指定) */
-                 'Meiryo',             /* Windowsのゴシック体 */
-                 'Yu Gothic',          /* Windowsのゴシック体 */
-                 sans-serif;           /* 最後に必ず sans-serif を指定 */
+                 'Hiragino Sans',
+                 'Hiragino Kaku Gothic ProN',
+                 'Meiryo',
+                 'Yu Gothic',
+                 sans-serif;
 }
 
 header{
+    width: 100%;
     height: 72px;
+    max-width: 450px; 
+    margin: 0 auto;
     padding: 10px 12px;
     background-color: #CE5345;
     display: flex;
     align-items: center;
     justify-content: right;
+    position: fixed; /* ヘッダーを画面に固定 */
+    top: 0;
+    left: 0;
+    right: 0;
+    /* 他のコンテンツより手前に表示 */
+    z-index: 999; 
 }
 
 #title{
@@ -42,7 +51,6 @@ header{
     color: #FBF9F1;
     text-align: center;
     font-size: 32px;
-
 }
 
 /* menuを広げるボタン */
@@ -62,19 +70,19 @@ header{
 
 /* メニューリストの定義 */
 #menu_list{
+    width: 250px;
+    /* PC中央寄せの複雑な計算を削除し、スマホでは画面右端に固定 */
+    right: 0;    
+    left: auto; /* 左からの位置指定を無効化 */
     margin: 0;
-    position: fixed;
-    border: none;
+    padding: 20px;
     top: 72px; 
     bottom: 24px; 
     height: auto; 
-    /* PC中央寄せの複雑な計算を削除し、スマホでは画面右端に固定 */
-    right: 0;    
-    width: 250px;
-    left: auto; /* 左からの位置指定を無効化 */
+    position: fixed;
+    border: none;
     background-color: #FBF9F1;
     z-index: 10000;
-    padding: 20px;
     box-shadow: -2px 0 2px 0 rgba(0, 0, 0, 0.25);
 } 
 
@@ -112,12 +120,12 @@ header{
 
 .main{
     flex: 1; /* 余った高さを全部使う */
+    padding-top: 72px;
 }
 
 section{
-    /* section 自体に左右の余白を適用し、main の padding を引き継ぐ */
-    margin: 24px 12px; /* 既存のCSSを元に戻す */
-    width: auto; /* width: 100% のままでも可 */
+    margin: 24px 12px;
+    width: auto;
 }
 
 #settei{
@@ -129,6 +137,12 @@ h3{
     font-size: 24px;
     font-weight: lighter;
     color: 201F1F;
+}
+
+#introduction{
+    font-size: 16px;
+    color: 201F1F;
+    text-align: left;
 }
 
 #theme,#label,#memo,#label_option{
@@ -153,10 +167,11 @@ button{
     cursor: pointer;
 }
 
+/* ラベルを追加できないとき */
 #label_add:disabled {
-    background: #ccc;           /* グレーで無効感を出す */
-    color: #666;                /* 文字も薄く */
-    cursor: not-allowed;        /* 押せないマークに変更 */
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
     box-shadow: none;
 }
 
@@ -189,7 +204,7 @@ button{
     flex-wrap: wrap;
 }
 
-#next,#clear{
+#next2,#clear{
     margin-top: 60px;
     justify-content: center;
     cursor: pointer;
@@ -206,21 +221,18 @@ footer{
 }
 
 
-/* mainのcss */
-
-
+/* main.htmlのcss */
 #tabs{
     height: 100%;
     background-color:#FBF9F1;
     border: none;
-
 }
 
 /* タブ下の境界線（通常は灰色）を非表示にし、タブをコンテンツと一体化 */
 .ui-tabs .ui-tabs-panel {
-    padding: 0; /* デフォルトのpaddingを消去 */
-    border-width: 0; /* 境界線を消去 */
-    background: none; /* 背景を消去 */
+    padding: 0;
+    border-width: 0;
+    background: none;
 }
 
 /* タブバーの線の削除と Flexbox の調整 */
@@ -231,7 +243,7 @@ footer{
     display: flex;
     width: 100%; 
     height: 50px;
-    border: none; /* ★ 線を消す */
+    border: none;
     background-color: #FBF9F1;
 }
 
@@ -240,8 +252,8 @@ footer{
     flex-grow: 1; 
     text-align: center;
     background-color: #E7E0D0; 
-    border: none; /* ★ 線を消す */
-    margin-right: 0; /* ★ タブ間のわずかな境界を消す */
+    border: none;
+    margin-right: 0;
 }
 
 /* 非アクティブなタブの文字色 */
@@ -270,9 +282,7 @@ footer{
     padding-bottom: 0px; 
 }
 
-
-
-#kiroku, #graph {    
+#kiroku{    
     padding: 0 12px;
     display: flex;
     flex-direction: column;
@@ -280,7 +290,15 @@ footer{
     align-items: center;
 }
 
-#today,#average_time_display{
+#today{
+    color: #406199;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+
+#average_time_display{
+    margin-top: 24px;
     color: #406199;
     font-size: 24px;
     font-weight: 900;
@@ -302,7 +320,6 @@ footer{
     flex-direction: column;
     justify-content: center;
 }
-
 
 #reset{
     margin: 10px auto;
@@ -329,5 +346,16 @@ footer{
     overflow-x: hidden; /* 横方向のスクロールは無効にする (横棒グラフのため) */
 }
 
+#graph-wrapper{
+    width: 100%;
+    /* グラフが画面からはみ出た場合、スクロールできるようにする */
+    overflow-x: auto; 
+    overflow-y: auto;
+}
 
-/* cssの調整から */
+#chart-container{
+    /* 棒の高さに応じてキャンバス自体が広がるよう、最小の高さを確保 */
+    min-height: 400px; 
+    /* デフォルトのキャンバスの幅は100%のまま */
+    width: 100%;
+}
