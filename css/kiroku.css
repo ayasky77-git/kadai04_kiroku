@@ -9,19 +9,27 @@ html{
 }
 
 body{
-    width: 375px;
-    height: 812px;
-    margin: 0 auto;
+    width: 100%; 
+    /* PC表示時の最大の幅を設定 */
+    max-width: 450px; 
+    /* 左右のマージンをautoにすることで、max-widthを超えた場合にコンテンツを中央寄せする */
+    margin: 0 auto; 
+    min-height: 100vh;
     background-color: #FBF9F1;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: column;
+    font-family: 'Noto Sans JP', 
+                 'Hiragino Sans',      /* Mac/iOSのゴシック体 */
+                 'Hiragino Kaku Gothic ProN', /* Mac/iOSのゴシック体 (古い指定) */
+                 'Meiryo',             /* Windowsのゴシック体 */
+                 'Yu Gothic',          /* Windowsのゴシック体 */
+                 sans-serif;           /* 最後に必ず sans-serif を指定 */
 }
 
 header{
     height: 72px;
-    margin-top: 44px;
-    padding: 10px;
+    padding: 10px 12px;
     background-color: #CE5345;
     display: flex;
     align-items: center;
@@ -54,25 +62,28 @@ header{
 
 /* メニューリストの定義 */
 #menu_list{
-margin: 0;
+    margin: 0;
     position: fixed;
     border: none;
-    /* ヘッダーのすぐ下に合わせる（ヘッダーの高さ72pxを基準） */
-    top: 116px; 
-    /* フッターの上で止める（フッターの高さ24px + マージン34px = 58px）*/
-    bottom: 58px; 
-    /* topとbottomの間を埋める */
+    top: 72px; 
+    bottom: 24px; 
     height: auto; 
-    /* PC中央寄せのスマホ枠の右端に合わせる */
-    right: calc(50% - 187.5px);    
+    /* PC中央寄せの複雑な計算を削除し、スマホでは画面右端に固定 */
+    right: 0;    
     width: 250px;
-    /* レフトをリセット */
-    left: auto;
+    left: auto; /* 左からの位置指定を無効化 */
     background-color: #FBF9F1;
     z-index: 10000;
     padding: 20px;
     box-shadow: -2px 0 2px 0 rgba(0, 0, 0, 0.25);
-}   
+} 
+
+@media (min-width: 475px) {
+    #menu_list {
+        /* bodyの右端位置 (50% + bodyの半幅 225px) にメニューリストの左端を合わせる */
+        right: calc(50% - 225px); 
+    }
+}
 
 /* メニューリストが開いているとき、#menuボタンを非表示にする */
 #menu_list:popover-open ~ #menu {
@@ -104,8 +115,9 @@ margin: 0;
 }
 
 section{
-    width: 100%;
-    margin: 24px 12px;
+    /* section 自体に左右の余白を適用し、main の padding を引き継ぐ */
+    margin: 24px 12px; /* 既存のCSSを元に戻す */
+    width: auto; /* width: 100% のままでも可 */
 }
 
 #settei{
@@ -185,7 +197,6 @@ button{
 
 footer{
     height: 24px;
-    margin-bottom: 34px;
     background-color: #CE5345; 
     font-size: 14px;
     color: #FBF9F1;
@@ -196,31 +207,41 @@ footer{
 
 
 /* mainのcss */
+
+
 #tabs{
     height: 100%;
     background-color:#FBF9F1;
+    border: none;
+
 }
 
+/* タブ下の境界線（通常は灰色）を非表示にし、タブをコンテンツと一体化 */
+.ui-tabs .ui-tabs-panel {
+    padding: 0; /* デフォルトのpaddingを消去 */
+    border-width: 0; /* 境界線を消去 */
+    background: none; /* 背景を消去 */
+}
+
+/* タブバーの線の削除と Flexbox の調整 */
 .ui-tabs .ui-tabs-nav {
     margin: 0;
     padding: 0;
-    list-style: none; /* リストの点（デフォルト）を非表示 */
-    /* Flexboxを適用し、横幅いっぱいに広げる ★ */
+    list-style: none;
     display: flex;
     width: 100%; 
     height: 50px;
-    border: none;
+    border: none; /* ★ 線を消す */
     background-color: #FBF9F1;
 }
 
 /* 非アクティブなタブの親要素 (li) の設定 */
 .ui-tabs .ui-tabs-nav li {
-    /* これで横幅を均等に分割 */
     flex-grow: 1; 
-    text-align: center; /* コンテンツ中央寄せ */
+    text-align: center;
     background-color: #E7E0D0; 
-    border: none;
-    margin-right: 0.1em; /* タブ間のわずかな境界 */
+    border: none; /* ★ 線を消す */
+    margin-right: 0; /* ★ タブ間のわずかな境界を消す */
 }
 
 /* 非アクティブなタブの文字色 */
@@ -242,17 +263,17 @@ footer{
     z-index: 2;
 }
 
-/* アクティブなタブの文字色 */
-.ui-tabs .ui-tabs-nav .ui-tabs-active a {
-    color: #201F1F; /* アクティブ時の文字色 */
-}
-
 /* タブ下の境界線（通常は灰色）を非表示にし、タブをコンテンツと一体化 */
-.ui-tabs .ui-tabs-panel {
-    border-top: none; 
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a {
+    /* アクティブタブのリンクをコンテンツエリアに近づける */
+    border-bottom: 5px solid #FBF9F1; 
+    padding-bottom: 0px; 
 }
 
-#kiroku{
+
+
+#kiroku, #graph {    
+    padding: 0 12px;
     display: flex;
     flex-direction: column;
     justify-content: center;
